@@ -1,50 +1,90 @@
+author = 'Thomas Grossi'
+version = '0.3'
+
 import random
+
+from midi_IO import input_midi_chords
 from transitions import TransitionMatrix
-from section_builder import NormalSection, TransitionSection
+from sections import Section, TransitionSection
 
 
-class NoteSequence():
-    def __init__(self, initial_notes, structure, mapping, lengths=(400, 400)):
-        self.matrix = TransitionMatrix(initial_notes)
-        self.structure = structure
-        self.map = mapping
-        self.section_length = lengths[0]
-        self.transition_length = lengths[1]
-        self.total_length = (self.section_length * len(self.structure)) + (
-                     self.transition_length * (len(self.structure) - 1))
-        self.get_note = self.note_generator(random.choice(initial_notes))
-        self.sequence = self.create_sequence()
+class NoteSequence(object):
+    def __init__(self, notes, structure, mapping, section, transition):
+        self.matrix = TransitionMatrix(numbers=notes)
+        self.total_length = ((section * len(structure)) +
+                            (transition * (len(structure) - 1)))
+        self.get_note = self.note_generator(initial_note=random.choice(notes),
+                                            length=self.total_length,
+                                            matrix=self.matrix)
+        self.data = self.create_sequence(structure, mapping, section,
+                                             transition)
 
-    def note_generator(self, note):
-        for i in range(self.total_length):
+    @staticmethod
+    def note_generator(initial_note, matrix, length):
+        '''Starting from *initial_note*, generates *length*
+        notes based on the choices and probabilities
+        specified in *matrix*. '''
+        note = initial_note
+        for i in range(length):
             rand = random.random()
-            for pos, num in enumerate(self.matrix[note].probs):
+            for pos, num in enumerate(matrix[note].probs):
                 if rand < num:
-                    note = self.matrix[note].choices[pos]
+                    note = matrix[note].choices[pos]
                     break
             yield note
 
-    def create_sequence(self):
+    def create_sequence(self, structure, mapping, section, transition):
+        '''Builds a sequence with section structure *structure*, where
+        conversion of notes or chords from one section to the next are
+        defined in *mapping*. Arguments *section* and *transition*
+        refer to the lengths (in notes) of normal and transition
+        sections within the sequence. Returns a list.'''
         sequence = []
-        for i, letter in enumerate(self.structure):
-            section = NormalSection(self.get_note, self.transition_length,
-                                    self.map, letter).section
+        for i, letter in enumerate(structure):
+            section = Section(generator=self.get_note,
+                              length=section,
+                              mapping=mapping,
+                              section_letter=letter).create_section()
             sequence.extend(section)
             try:
-                next_letter = self.structure[i + 1]
+                next_letter = structure[i + 1]
                 ascend = letter < next_letter
-                section = TransitionSection(self.get_note, self.section_length,
-                                            self.map, letter, next_letter,
-                                            ascend=ascend).section
+                section = TransitionSection(generator=self.get_note,
+                                            length=transition,
+                                            mapping=mapping,
+                                            first=letter,
+                                            second=next_letter,
+                                            ascend=ascend).transition_section()
                 sequence.extend(section)
             except IndexError:
                 pass
         return sequence
 
-notes = [1, 2, 3, 2, 3, 2, 1, 2, 3, 1]
+    def __iter__(self):
+        for note in self.data:
+            yield note
 
-new_map = {'A': notes,
-           'B': [n + 7 for n in notes],
-           'C': [n + 12 for n in notes]}
+    def __getitem__(self, number):
+        return self.data[number]
 
-# a = NoteSequence(notes, 'ABA', new_map, (200, 200))
+    def __len__(self):
+        return len(self.data)
+
+    def __str__(self):
+        return str(self.data)
+
+    def __repr__(self):
+        return str(self.data)
+
+
+def main():
+    chords = input_midi_chords('chord_test.mid')
+    chord_mapping = {'A': list(set(chords)),
+               'B': [tuple(x + 7 for x in e) for e in list(set(chords))],
+               'C': [tuple(x + 12 for x in e) for e in list(set(chords))]}
+    seq = NoteSequence(chords, 'ABACA', chord_mapping, 200, 200)
+    print(seq)
+
+
+if __name__ == '__main__':
+    main()
