@@ -13,26 +13,23 @@ def create_ordered_set(sequence):
 
 
 @debug.create_map_template
-def create_map_template(output_filename, melody, structure, map_files=[]):
-    '''*melody* is a list of note values. *structure* is a string of
-    characters, which are labels for the sections (eg. ABACA). *map_files*
-    is a list of additional midi file names, each of which should contain
-    the version of *melody* in that section. The function creates a template
-    mapping file. The file has 4 lines, detailing the structure, a list of
-    section lengths (default 16 notes), a list of transition lengths
-    (default 8 notes) and a mapping dictionary, describing what each unique
-    note from the *melody* corrisponds to within other sections. '''
-    A_section = create_ordered_set(melody)
+def create_map_template(map_files, structure, output_file='Nameless_Map.txt'):
+    '''Takes a list of midi file names, uses them to build a dictionary,
+    mapping uppercase ascii letters to the ordered set of notes extracted from 
+    the files. Writes out a .txt file containing structure, a list of
+    section and transition lengths (defaults 16 and 8), and the dictionary.'''
     sections = [16] * len(structure)
     transitions = [8] * (len(structure) - 1)
-    with open(output_filename, 'w') as f:
-        f.write('structure = "{0}"\n# Length of sections (in number'
-                ' of notes):\nsections = {1}\n# Length of '
+    with open(output_file, 'w') as f:
+        f.write('# From midi files: {0}\n'
+                'structure = "{1}"\n# Length of sections (in number'
+                ' of notes):\nsections = {2}\n# Length of '
                 'transitions between sections (in number of notes):\n'
-                'transitions = {2}\nmapping = {{"A": {3}'
-                .format(structure, sections, transitions, A_section))
+                'transitions = {3}\nmapping = '
+                .format(map_files, structure, sections, transitions))
+        f.write('{')
         for i, file_name in enumerate(map_files):
-            section_letter = chr(i + 66)
+            section_letter = chr(i + 65)
             section_values = create_ordered_set(midi_input(file_name))
             f.write(', "{}": {}'.format(section_letter, section_values))
         f.write('}')
@@ -52,11 +49,9 @@ def read_map_file(filename):
 
 
 def main():
-    chords = midi_input('MSL.mid')
-    create_map_template(output_filename='Map56.txt',
-                    melody=chords,
-                    structure='ABC',
-                    map_files=['MSL.mid', 'MSL.mid'])
+    create_map_template(map_files=['input_test.mid', 'input_test.mid'],
+                        structure='ABA',
+                        output_file='map_test.txt')
 
 if __name__ == '__main__':
     main()
