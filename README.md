@@ -1,11 +1,10 @@
-# note-sequences
 Collection of modules for extracting structural information from melodic sequences and using it to build new music with similar structure. Supports sequences of single notes or chords. Has option to read in melodic information from midi files and to write out the new sequences as midi files.
 
 N.B. within this program, note values are tuples containing integers. A tuple of one element is a single note, whereas longer tuples are chords. The integers are meant to represent midi notes, and should be within range 0 - 127. Length of a sequence or section is measured in number of notes or chords.
 
 Dependencies: Mido 1.1.19
 
-#sequences.py# contains classes to build the output note sequences. Classes are:
+*sequences.py* contains classes to build the output note sequences. Classes are:
 - Sequence: takes a list of note values (created in python or read in from a midi file, see midi_toolkit.py) or       
   another Sequence object, and a length. Builds a sequence which follows the same melodic structure.
 - NoteSequence: subclass of Sequence. Requires a .txt file with information about the desired structure (e.g. 'ABACA'), the
