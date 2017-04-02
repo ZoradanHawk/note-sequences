@@ -42,14 +42,17 @@ def note_sequence_init(function):
 def create_transition_matrix(function):
     @functools.wraps(function)
     def inner(numbers):
-        if not isinstance(numbers, list) and not isinstance(numbers, tuple):
-            raise TypeError('Invalid argument: {}. Must be a list or tuple.')
-        for item in numbers:
-            if isinstance(item, tuple):
-                continue
-            else:
-                raise TypeError('Invalid item: {}. Must be int or tuple.'
-                               .format(item))
+        try:
+            for note_value in numbers:
+                if isinstance(note_value, tuple):
+                    for note in note_value:
+                        if not isinstance(note, int):
+                            raise TypeError('Invalid note, must be an int')
+                else:
+                    raise TypeError('Invalid note value: {}. Must be a tuple.'
+                                   .format(note_value))
+        except TypeError:
+            raise TypeError('Argument must be a list, tuple or Sequence.')
         return function(numbers)
     return inner
 
@@ -96,26 +99,20 @@ def transition_init(function):
 
 def create_map_template(function):
     @functools.wraps(function)
-    def inner(output_filename, melody, structure, map_files):
-        if output_filename[-4:] != '.txt':
-            raise ValueError('Invalid filename: {}. Must be .txt file.'
-                             .format(output_filename))
-        if not isinstance(melody, list) and not isinstance(melody, tuple):
-            raise TypeError('Invalid melody: {}. Must be a list or tuple.'
-                            .format(melody))
-        if not isinstance(structure, str):
-            raise TypeError('Invalid structure: {}. Must be a string.'
-                            .format(structure))
+    def inner(map_files, structure, output_file):
+        for filename in map_files:
+            if filename[-4:] != '.mid':
+                raise ValueError('*map_files* must contain midi file names!')
         if 'A' not in structure:
-            raise ValueError('Structure must contain character "A"!')
+            raise ValueError('Structure must contain character "A".')
         letters = set([chr(i) for i in range(66, 66 + len(map_files))] + ['A'])
         if set(structure) != letters:
             raise ValueError('Invalid structure: {}. Must be based on {}'.
                              format(structure, letters))
-        for filename in map_files:
-            if filename[-4:] != '.mid':
-                raise ValueError('*map_files* must contain midi file names!')
-        return function(output_filename, melody, structure, map_files)
+        if output_file[-4:] != '.txt':
+            raise ValueError('Invalid filename: {}. Must be .txt file.'
+                             .format(output_file))
+        return function(map_files, structure, output_file)
     return inner
 
 
