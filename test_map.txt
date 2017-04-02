@@ -1,0 +1,6 @@
+structure = "ABC"
+# Length of sections (in number of notes):
+sections = [16, 16, 16]
+# Length of transitions between sections (in number of notes):
+transitions = [8, 8]
+mapping = {"A": [(64,), (72,), (71,), (65,), (67,)], "B": [(64,), (72,), (71,), (65,), (67,)], "C": [(64,), (72,), (71,), (65,), (67,)]}
