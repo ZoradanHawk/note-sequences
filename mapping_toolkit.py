@@ -12,8 +12,8 @@ def create_ordered_set(sequence):
     return final
 
 
-#@debug.create_map_template
-def create_map_template(map_files, structure, output_file='Nameless_Map.txt'):
+#@debug.create_map_file
+def create_map_file(map_files, structure, output_file='Nameless_Map.txt'):
     '''Takes a list of midi file names, uses them to build a dictionary,
     mapping uppercase ascii letters to the ordered set of notes extracted from
     the files. Writes out a .txt file containing structure, a list of
@@ -42,12 +42,17 @@ def read_map_file(filename):
     '''Takes a mapping .txt file, reads in information about structure,
     mapping, section lengths and transition lengths from it.
     NB. Mapping file must follow the template format. If you are unsure
-    of the format, use the function *create_map_template* to generate
+    of the format, use the function *create_map_file* to generate
     an adeguate file.'''
-    with open(filename, 'r') as f:
-        for line in f.readlines():
-            exec(line)
-    map_data = debug.read_map_file(structure, mapping, sections, transitions)
+    with open('Map56.txt', 'r') as filename:
+        output = []
+        for line in filename.readlines():
+            if line.startswith('#'):
+                continue
+            if line.endswith('\n'):
+                line = line[:-1]
+            output.append(eval(line.split(' = ')[1]))
+    map_data = debug.read_map_file(*tuple(output))
     return map_data
 
 
