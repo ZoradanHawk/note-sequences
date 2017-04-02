@@ -1,11 +1,14 @@
+'''Contains various functions to extract values from midi files or
+write values into midi files.'''
+
 from mido import Message, MidiFile, MidiTrack, MetaMessage
 import random
 
 
 def midi_input(filename):
-    '''Takes a midi file that only contains chords, extracts
-    the note values of the chord components and stores them
-    in tuples, and the tuples in a list.'''
+    '''Takes a midi file, extracts note values as tuples 
+    of integers (single int: one note, many ints: chord.
+    Returns the tuples in a list.'''
     chords = []
     chord = []
     midi_file = MidiFile(filename)
@@ -30,7 +33,11 @@ def midi_input(filename):
 
 
 def extract_delta_times(sequence, rhythms):
-    '''Yes, it's a generator. That's new. '''
+    '''Pairs up elements of a Sequence with delta 
+    time values (default 240). If rhythms contains integer
+    values, the default delta time of 240 is multiplied by a
+    factor of one of the integers (chosen at random).
+    Returns a list of (note value, delta time) pairs'''
     index = 0
     if rhythms:
         while index < len(sequence):
@@ -47,8 +54,9 @@ def extract_delta_times(sequence, rhythms):
             yield chord, 240
 
 
-def midi_output(filename, sequence, rhythms=[], tempo=500000):
-    '''Takes a sequence of notes and writes them to a midi file.'''
+def midi_output(filename, sequence, rhythms=[]):
+    '''Takes a Sequence and writes them to a midi file. Optionally
+    takes a list of integer factors to vary rhythms in the output.'''
     with MidiFile() as outfile:
         track = MidiTrack()
         outfile.tracks.append(track)
@@ -56,7 +64,7 @@ def midi_output(filename, sequence, rhythms=[], tempo=500000):
                      clocks_per_click=24, notated_32nd_notes_per_beat=8,
                      time=0))
         track.append(MetaMessage('key_signature', key='C'))
-        track.append(MetaMessage('set_tempo', tempo=tempo))
+        track.append(MetaMessage('set_tempo', tempo=500000))
         track.append(Message('program_change', channel=0, program=0, time=0))
         track.append(Message('control_change', channel=0, control=121, value=0,
                                                                      time=0))
@@ -80,9 +88,3 @@ def midi_output(filename, sequence, rhythms=[], tempo=500000):
                                  velocity=0, time=0))
         track.append(MetaMessage('end_of_track'))
         outfile.save(filename)
-
-
-def group_midi_output(sequence_list, rhythms):
-    for index, sequence in enumerate(sequence_list):
-        filename = 'test_sequence{}.mid'.format(index)
-        midi_output(filename, sequence, rhythms[index])
