@@ -1,6 +1,5 @@
 '''This module contains the sequence classes. They take lists of note values and re-elaborate them in various ways.'''
 
-
 import random
 import sequence_toolkit as toolkit
 import debug_toolkit as debug
