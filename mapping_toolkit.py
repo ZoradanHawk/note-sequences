@@ -12,10 +12,10 @@ def create_ordered_set(sequence):
     return final
 
 
-@debug.create_map_template
+#@debug.create_map_template
 def create_map_template(map_files, structure, output_file='Nameless_Map.txt'):
     '''Takes a list of midi file names, uses them to build a dictionary,
-    mapping uppercase ascii letters to the ordered set of notes extracted from 
+    mapping uppercase ascii letters to the ordered set of notes extracted from
     the files. Writes out a .txt file containing structure, a list of
     section and transition lengths (defaults 16 and 8), and the dictionary.'''
     sections = [16] * len(structure)
@@ -28,10 +28,13 @@ def create_map_template(map_files, structure, output_file='Nameless_Map.txt'):
                 'transitions = {3}\nmapping = '
                 .format(map_files, structure, sections, transitions))
         f.write('{')
-        for i, file_name in enumerate(map_files):
+        for i, file_name in enumerate(map_files[:-1]):
             section_letter = chr(i + 65)
             section_values = create_ordered_set(midi_input(file_name))
-            f.write(', "{}": {}'.format(section_letter, section_values))
+            f.write('"{0}": {1}, '.format(section_letter, section_values))
+        last_letter = chr(len(map_files[:-1]) + 65)
+        last_value = create_ordered_set(midi_input(map_files[-1]))
+        f.write('"{0}": {1}'.format(last_letter, last_value))
         f.write('}')
 
 
