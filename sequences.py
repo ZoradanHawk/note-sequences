@@ -1,3 +1,6 @@
+'''This module contains the sequence classes. They take lists of note values and re-elaborate them in various ways.'''
+
+
 import random
 import sequence_toolkit as toolkit
 import debug_toolkit as debug
@@ -8,15 +11,17 @@ class Sequence(object):
 
     @debug.sequence_init
     def __init__(self, melody, length):
+        '''Main class. Takes a list of note values and builds a
+        new one with the same probability of transitioning from
+        one note to the next.'''
         self.melody = melody
         self.total_length = length
         self.data = self.create_sequence()
 
     @staticmethod
     def note_generator(melody, length):
-        '''Starting from *initial_note*, generates *length*
-        notes based on the choices and probabilities
-        specified in *matrix*. '''
+        '''Builds a transition matrix of note values
+        within *melody* and generates *length* values.'''
         note = random.choice(melody)
         matrix = toolkit.create_transition_matrix(melody)
         for i in range(length):
@@ -30,6 +35,7 @@ class Sequence(object):
             yield note
 
     def create_sequence(self):
+        '''Calls note_generator. Returns the output list of note values.'''
         generator = self.note_generator(self.melody, self.total_length)
         return [next(generator) for _ in range(self.total_length)]
 
@@ -51,11 +57,16 @@ class NoteSequence(Sequence):
 
     @debug.note_sequence_init
     def __init__(self, melody, map_filename):
+        '''Requires a .txt map file. Uses information within
+        it to build the output sequence based on *melody*.'''
         self.structure, self.map, self.sections,
         self.transitions = mappings.read_map_file(map_filename)
         Sequence.__init__(self, melody, sum(self.sections + self.transitions))
 
     def create_sequence(self):
+        '''Builds Section and Transition objects based on the order in 
+        *structure* and the lengths in *sections* and *transitions*.
+        Returns a list of note values.'''
         sequence = []
         generator = Sequence.note_generator(self.melody, self.total_length)
         section_lengths = (length for length in self.sections)
@@ -83,10 +94,14 @@ class NoteSequence(Sequence):
 
 class SparseSequence(Sequence):
     def __init__(self, melody, length, pause_value=61):
+        '''A Sequence with a flag value to be turned into pauses within
+        Sibelius or MuseScore. Pause value is prevalent early in the 
+        sequence, nonexistent towards the end.'''
         self.pause_value = pause_value
         Sequence.__init__(self, melody, length)
 
     def create_sequence(self):
+        '''Calls the note generator to build the output sequence.'''
         sequence = []
         generator = Sequence.note_generator(self.melody, self.total_length)
         for i in range(self.total_length):
@@ -103,14 +118,21 @@ class ChordSequence(NoteSequence):
         self.chord_increase = chord_increase
         NoteSequence.__init__(self, melody, map_filename)
 
-    def _update(self, note, prob, note_set):
+    def _update(self, note_value, prob, note_set):
+        '''Adds notes from *note_set* that are not currently
+        within the *note_value* tuple, uses them to extend the 
+        note value if probability check succeeds. Returns the
+        redacted (or not) note value.'''
         for _ in range(self.chord_increase):
             if random.random() < prob:
-                note_set = [o for o in note_set if o[0] not in note]
-                note += random.choice(note_set) if note_set else ()
-        return note
+                note_set = [n for n in note_set if n[0] not in note_value]
+                note_value += random.choice(note_set) if note_set else ()
+        return note_value
 
     def create_sequence(self):
+        '''Calls the note generator to build the sequence, however it has an 
+        ever increasing change of updating it to a longer chord. Returns the
+        new list of values.'''
         sequence = []
         generator = Sequence.note_generator(self.melody, self.total_length)
         section_lengths = (length for length in self.sections)
