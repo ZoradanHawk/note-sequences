@@ -1,4 +1,5 @@
-'''This module contains the sequence classes. They take lists of note values and re-elaborate them in various ways.'''
+'''Contains sequence classes, which take lists of note values 
+and re-elaborate them in various ways.'''
 
 import random
 import sequence_toolkit as toolkit
