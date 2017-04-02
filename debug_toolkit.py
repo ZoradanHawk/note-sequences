@@ -1,3 +1,7 @@
+'''Contains wrapper functions to check the arguments of several
+functions in other modules (type checking etc.). Names of the wrappers
+correspond to the function they are protecting.'''
+
 import functools
 import types
 
