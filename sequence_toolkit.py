@@ -5,9 +5,8 @@ import debug_toolkit as debug
 
 @debug.create_transition_matrix
 def create_transition_matrix(numbers):
-    '''Takes a list of integers (note values) or tuples
-    (chords) and returns a dictionary detailing which values
-    follow each unique value, and with what probability.
+    '''Takes a list of note values and returns a dictionary detailing
+    which values follow each unique value, and with what probability.
     E.g. if input is [1, 2, 1, 3, 1] the dictionary will show
     {1: [(2, 0.5), (3, 1.0)], 2: [(1, 1.0)], 3: [(1, 1.0)]}'''
     matrix = {}
@@ -15,16 +14,16 @@ def create_transition_matrix(numbers):
     pair_counter = collections.Counter(zip(numbers[:-1], numbers[1:]))
     for note in set(numbers):
         subset = [item for item in pair_counter.items() if item[0][0] == note]
-        choices = [key[1] for key, value in sorted(subset)]
-        total = sum(value for key, value in sorted(subset))
-        probs = [value / float(total) for key, value in sorted(subset)]
+        choices = [pair[1] for pair, count in sorted(subset)]
+        total_count = sum(count for pair, count in sorted(subset))
+        probs = [count / float(total_count) for pair, count in sorted(subset)]
         matrix[note] = list(zip(choices, mp(probs)))
     return matrix
 
 
 class Section(object):
-    '''A Section can create *length* notes or chords extracted from *generator*,
-    converted to their *section* equivalent using *mapping* as reference.'''
+    '''A Section consists of note values extracted from *generator*,
+    converted to their *section* equivalent.'''
     @debug.section_init
     def __init__(self, generator, length, mapping, section):
         self.generator = generator
@@ -33,15 +32,16 @@ class Section(object):
         self.section = section
         self.data = self.creat_section()
 
-    def _convert_to_section(self, note, section):
-        '''Takes a musical unit *element* (note or chord)
-        and converts it to its value in *section* as specified
-        in *mapping*.'''
-        index = self.map['A'].index(note)
+    def _convert_to_section(self, note_value, section):
+        '''Takes a note value and converts it to its value within 
+        *section* as specified in *mapping*.'''
+        index = self.map['A'].index(note_value)
         return self.map[section][index]
 
     def create_section(self):
-        '''Builds section *section*, as a list of notes or chords.'''
+        '''Builds the section by calling the instance generator
+        and converting the note values to the correct section 
+        (entry within the instance map).'''
         for i in range(self.length):
             note = next(self.generator)
             note = Section._convert_to_section(self, note, self.section)
@@ -53,10 +53,8 @@ class Section(object):
 
 
 class Transition(Section):
-    '''A Transition can create *length* notes or chords, extracted from
-    *generator*. Using *mapping* as a reference, it the notes are converted
-    to their *second* equivalent, with increasing probability if
-    *first* is lower than *second*, or decreasing probability otherwise.'''
+    '''A Transition consists of note values extracted from *generator*,
+    converted either to their *section* or *next_section* equivalent.'''
     @debug.transition_init
     def __init__(self, generator, length, mapping, section, next_section):
         self.next_section = next_section
@@ -65,8 +63,9 @@ class Transition(Section):
         Section.__init__(self, generator, length, mapping, section)
 
     def create_section(self):
-        '''Builds the transition between *section*
-        and *next_section*, as a list of notes or chords.'''
+        '''Builds the transition between *section* and *next_section*.
+        The probability of turning to next_section notes increases if
+        *first_section* is lower than *next_section*, decreases otherwise.'''
         if self.ascending:
             lower, higher = self.section, self.next_section
             update_probability = self._increase_probability
@@ -83,11 +82,11 @@ class Transition(Section):
             yield note
 
     def _increase_probability(self):
-        '''Increases the probability instance variable by a
-        fraction proportional to transition length.'''
+        '''Increases the instance probability by a
+        fraction proportional to instance length.'''
         self.probability += 1 / float(self.length)
 
     def _decrease_probability(self):
-        '''Decreases the probability instance variable by a
-        fraction proportional to transition length.'''
+        '''Decreases the instance probability by a
+        fraction proportional to instance length.'''
         self.probability -= 1 / float(self.length)
