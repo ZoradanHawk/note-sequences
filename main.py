@@ -1,8 +1,16 @@
-from midi_toolkit import midi_input
-from mapping_toolkit import read_map_file
+authors = 'Thomas Grossi, Matt Giannotti'
+version = '0.7'
+
+import midi_toolkit as midi
 import sequences
 
-melody = midi_input('MSL.mid')
-map_data = read_map_file('Map56.txt')
+notes = midi.midi_input('test_input.mid')
 
-b = sequences.NoteSequence(melody, *map_data)
+# Example of creating sequences
+seq = sequences.Sequence(melody=notes, length=100)
+note_seq = sequences.NoteSequence(melody=notes, map_filename='test_map.txt')
+sparse_seq = sequences.SparseSequence(melody=notes, length=100, pause_note=60)
+chord_seq = sequences.ChordSequence(melody=notes, map_filename='test_map.txt', chord_increase=3)
+
+midi.midi_output(filename='test_output_with_rhythms.mid', sequence=seq, rhythms=[(2, 3), (2, 2)])
+midi.midi_output(filename='test_output.mid', sequence=note_seq)
