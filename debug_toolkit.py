@@ -105,7 +105,7 @@ def create_map_template(function):
                 raise ValueError('*map_files* must contain midi file names!')
         if 'A' not in structure:
             raise ValueError('Structure must contain character "A".')
-        letters = set([chr(i) for i in range(66, 66 + len(map_files))] + ['A'])
+        letters = set([chr(i) for i in range(65, 65 + len(map_files))])
         if set(structure) != letters:
             raise ValueError('Invalid structure: {}. Must be based on {}'.
                              format(structure, letters))
