@@ -97,7 +97,7 @@ def transition_init(function):
     return inner
 
 
-def create_map_template(function):
+def create_map_file(function):
     @functools.wraps(function)
     def inner(map_files, structure, output_file):
         for filename in map_files:
@@ -123,7 +123,7 @@ def read_map_file(structure, mapping, sections, transitions):
     if 'A' not in structure:
         raise ValueError('Structure must contain character "A"!')
     for value in mapping.values():
-        if len(value) != len(mapping.values()[0]):
+        if len(value) != len(list(mapping.values())[0]):
             raise ValueError('Entries in *mapping* must have same length!')
     for letter in structure:
         if letter not in mapping.keys():
