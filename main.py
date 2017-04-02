@@ -1,5 +1,5 @@
-authors = 'Thomas Grossi, Matt Giannotti'
-version = '0.7'
+__author__ = 'Thomas Grossi, Matt Giannotti'
+__version__ = '0.7'
 
 import midi_toolkit as midi
 import sequences
