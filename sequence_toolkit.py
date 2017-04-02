@@ -31,6 +31,7 @@ class Section(object):
         self.length = length
         self.map = mapping
         self.section = section
+        self.data = self.creat_section()
 
     def _convert_to_section(self, note, section):
         '''Takes a musical unit *element* (note or chord)
@@ -47,8 +48,8 @@ class Section(object):
             yield note
 
     def __iter__(self):
-        for i in self.create_section():
-            yield i
+        for note in self.data:
+            yield note
 
 
 class Transition(Section):
@@ -58,12 +59,12 @@ class Transition(Section):
     *first* is lower than *second*, or decreasing probability otherwise.'''
     @debug.transition_init
     def __init__(self, generator, length, mapping, section, next_section):
-        Section.__init__(self, generator, length, mapping, section)
         self.next_section = next_section
         self.ascending = section < next_section
         self.probability = 0.0 if self.ascending else 1.0
+        Section.__init__(self, generator, length, mapping, section)
 
-    def create_transition(self):
+    def create_section(self):
         '''Builds the transition between *section*
         and *next_section*, as a list of notes or chords.'''
         if self.ascending:
@@ -90,7 +91,3 @@ class Transition(Section):
         '''Decreases the probability instance variable by a
         fraction proportional to transition length.'''
         self.probability -= 1 / float(self.length)
-
-    def __iter__(self):
-        for i in self.create_transition():
-            yield i
