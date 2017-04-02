@@ -5,7 +5,7 @@ N.B. within this program, note values are tuples containing integers. A tuple of
 
 Dependencies: Mido 1.1.19
 
-sequences.py contains classes to build the output note sequences. Classes are:
+#sequences.py# contains classes to build the output note sequences. Classes are:
 - Sequence: takes a list of note values (created in python or read in from a midi file, see midi_toolkit.py) or       
   another Sequence object, and a length. Builds a sequence which follows the same melodic structure.
 - NoteSequence: subclass of Sequence. Requires a .txt file with information about the desired structure (e.g. 'ABACA'), the
@@ -17,13 +17,13 @@ sequences.py contains classes to build the output note sequences. Classes are:
 - ChordSequence: subclass of NoteSequence. Every note in the sequence has a certain probability (0 in the beginning, 1.0 by the end) of turning
   into a chord (argument chord_increase indicates the maximum amount of notes that can be added)
 
-section_toolkit.py contains classes Section and TransitionSection, used to build NoteSequences. It also contains the function to create transition matrices, used by all sequences. 
+*section_toolkit.py* contains classes Section and TransitionSection, used to build NoteSequences. It also contains the function to create transition matrices, used by all sequences. 
 
-midi_toolkit.py contains functions to extract note values from midi files, and to write out new midi files with note values from Sequence
+*midi_toolkit.py* contains functions to extract note values from midi files, and to write out new midi files with note values from Sequence
 objects (if rhythms aren't specified, defaults to eight-note values)
 
-mapping_toolkit.py contains functions to create and read in the .txt files containing the structural information needed by NoteSequence and ChordSequence.
+*mapping_toolkit.py* contains functions to create and read in the .txt files containing the structural information needed by NoteSequence and ChordSequence.
 
-debug_toolkit.py contains wrapper functions to test the arguments of various functions (e.g. type checking).
+*debug_toolkit.py* contains wrapper functions to test the arguments of various functions (e.g. type checking).
 
-main.py runs example Sequences based on test_input.mid and test_map.txt
+*main.py* runs example Sequences based on test_input.mid and test_map.txt
