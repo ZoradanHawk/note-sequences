@@ -4,15 +4,17 @@ import debug_toolkit as debug
 
 
 @debug.create_transition_matrix
-def create_transition_matrix(numbers):
+def create_transition_matrix(melody):
     '''Takes a list of note values and returns a dictionary detailing
     which values follow each unique value, and with what probability.
-    E.g. if input is [1, 2, 1, 3, 1] the dictionary will show
-    {1: [(2, 0.5), (3, 1.0)], 2: [(1, 1.0)], 3: [(1, 1.0)]}'''
+    Probabilities ar formatted in a cumulative way, for example four
+    note values with probabilities [0.2, 0.4, 0.2, 0.2] will be shown
+    as [(n1, 0.2), (n2, 0.6), (n3, 0.8), (n4, 1.0)]. This allows to
+    choose one of the values by cycling through the list.'''
     matrix = {}
     mp = lambda a: [sum(a[i] for i in range(j)) for j in range(1, len(a) + 1)]
-    pair_counter = collections.Counter(zip(numbers[:-1], numbers[1:]))
-    for note in set(numbers):
+    pair_counter = collections.Counter(zip(melody[:-1], melody[1:]))
+    for note in set(melody):
         subset = [item for item in pair_counter.items() if item[0][0] == note]
         choices = [pair[1] for pair, count in sorted(subset)]
         total_count = sum(count for pair, count in sorted(subset))
