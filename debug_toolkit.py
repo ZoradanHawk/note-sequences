@@ -116,7 +116,7 @@ def create_map_file(function):
     return inner
 
 
-def read_map_file(structure, mapping, sections, transitions):
+def read_map_file(structure, sections, transitions, mapping):
     if not isinstance(structure, str):
             raise TypeError('Invalid structure: {}. Must be a string.'
                             .format(structure))
@@ -138,4 +138,4 @@ def read_map_file(structure, mapping, sections, transitions):
                              'one less than lengths in *sections*.')
     else:
         transitions = [0] * (len(sections) - 1)
-    return structure, mapping, sections, transitions
+    return structure, sections, transitions, mapping
