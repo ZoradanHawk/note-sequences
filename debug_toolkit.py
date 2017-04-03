@@ -8,7 +8,7 @@ import types
 
 def sequence_init(function):
     @functools.wraps(function)
-    def inner(self, melody, length)
+    def inner(self, melody, length):
         for note_value in melody:
             if not isinstance(note_value, tuple):
                 raise ValueError('Invalid note: {}. Must be a tuple.'
