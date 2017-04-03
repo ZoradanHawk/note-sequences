@@ -44,9 +44,9 @@ def read_map_file(filename):
     NB. Mapping file must follow the template format. If you are unsure
     of the format, use the function *create_map_file* to generate
     an adeguate file.'''
-    with open('Map56.txt', 'r') as filename:
+    with open(filename, 'r') as f:
         output = []
-        for line in filename.readlines():
+        for line in f.readlines():
             if line.startswith('#'):
                 continue
             if line.endswith('\n'):
