@@ -4,7 +4,7 @@ and re-elaborate them in various ways.'''
 import random
 import sequence_toolkit as toolkit
 import debug_toolkit as debug
-import mapping_toolkit as mappings
+from mapping_toolkit import read_map_file as create_map
 
 
 class Sequence(object):
@@ -59,8 +59,8 @@ class NoteSequence(Sequence):
     def __init__(self, melody, map_filename):
         '''Requires a .txt map file. Uses information within
         it to build the output sequence based on *melody*.'''
-        self.structure, self.map, self.sections,
-        self.transitions = mappings.read_map_file(map_filename)
+        self.structure, self.sections, self.transitions, self.map = read_map(
+            map_filename)
         Sequence.__init__(self, melody, sum(self.sections + self.transitions))
 
     def create_sequence(self):
