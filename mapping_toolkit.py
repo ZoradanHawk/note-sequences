@@ -12,7 +12,7 @@ def create_ordered_set(sequence):
     return final
 
 
-#@debug.create_map_file
+@debug.create_map_file
 def create_map_file(map_files, structure, output_file='Nameless_Map.txt'):
     '''Takes a list of midi file names, uses them to build a dictionary,
     mapping uppercase ascii letters to the ordered set of notes extracted from
