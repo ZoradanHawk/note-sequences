@@ -30,7 +30,7 @@ class Section(object):
         self.length = length
         self.map = mapping
         self.section = section
-        self.data = self.creat_section()
+        self.data = self.create_section()
 
     def _convert_to_section(self, note_value, section):
         '''Takes a note value and converts it to its value within 
