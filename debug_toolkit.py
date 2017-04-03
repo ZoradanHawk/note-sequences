@@ -8,16 +8,13 @@ import types
 
 def sequence_init(function):
     @functools.wraps(function)
-    def inner(self, melody, length):
-        if not isinstance(melody, list) and not isinstance(melody, tuple):
-            raise TypeError('Invalid melody: {}. Must be a list or tuple.'
-                            .format(melody))
-        for note in melody:
-            if not isinstance(note, tuple):
+    def inner(self, melody, length)
+        for note_value in melody:
+            if not isinstance(note_value, tuple):
                 raise ValueError('Invalid note: {}. Must be a tuple.'
-                                .format(note))
+                                .format(note_value))
         if not isinstance(length, int):
-            raise TypeError('Invalid length; {}. Must be an integer.'
+            raise TypeError('Invalid length: {}. Must be an integer.'
                             .format(length))
         if not length > 0:
             raise ValueError('Length must be larger than 0.')
@@ -29,30 +26,51 @@ def note_sequence_init(function):
     @functools.wraps(function)
     def inner(self, melody, map_filename):
         if not isinstance(map_filename, str):
-            raise TypeError('Invalid *map_filename*: {}. Must be a string.'
+            raise TypeError('Invalid file name: {}. Must be a string.'
                             .format(map_filename))
         if map_filename[-4:] != '.txt':
             raise ValueError('Invalid file: {}. Map file must be a .txt map.'
-                             'Use create_map_template to generate one.'
                              .format(map_filename))
         return function(self, melody, map_filename)
+    return inner
+
+
+def sparse_sequence_init(function):
+    @functools.wraps(function)
+    def inner(self, melody, length, pause_value=61):
+        if not isinstance(pause_value, int):
+            raise TypeError('Invalid pause value: {}. Must be an int.'
+                            .format(pause_value))
+        if not pause_value in range(128):
+            raise ValueError('Pause value must be a valid midi note (0 - 128).')
+        return function(self, melody, length, pause_value)
+    return inner
+
+
+def chord_sequence_init(function):
+    @functools.wraps(function)
+    def inner(self, melody, map_filename, chord_increase=1):
+        if not isinstance(chord_increase, int):
+            raise TypeError('Invalid chord increase: {}. Must be an int.'
+                            .format(chord_increase))
+        if not chord_increase > 0:
+            raise ValueError('Chord increase must be larger than 0.')
+        return function(self, melody, map_filename, chord_increase)
     return inner
 
 
 def create_transition_matrix(function):
     @functools.wraps(function)
     def inner(numbers):
-        try:
-            for note_value in numbers:
-                if isinstance(note_value, tuple):
-                    for note in note_value:
-                        if not isinstance(note, int):
-                            raise TypeError('Invalid note, must be an int')
-                else:
-                    raise TypeError('Invalid note value: {}. Must be a tuple.'
-                                   .format(note_value))
-        except TypeError:
-            raise TypeError('Argument must be a list, tuple or Sequence.')
+        for note_value in numbers:
+            if isinstance(note_value, tuple):
+                for note in note_value:
+                    if not isinstance(note, int):
+                        raise TypeError('Invalid note: {}. Must be an int'
+                                        .format(note))
+            else:
+                raise TypeError('Invalid note value: {}. Must be a tuple.'
+                               .format(note_value))
         return function(numbers)
     return inner
 
