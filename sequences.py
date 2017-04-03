@@ -115,6 +115,10 @@ class SparseSequence(Sequence):
 
 class ChordSequence(NoteSequence):
     def __init__(self, melody, map_filename, chord_increase=1):
+        '''A NoteSequence that allows for gradual building of
+        chords within the sequence. Adds notes from the same
+        section values based on random chance. Argument chord_
+        _increase determines the maximum number of notes added.'''
         self.chord_increase = chord_increase
         NoteSequence.__init__(self, melody, map_filename)
 
@@ -130,9 +134,9 @@ class ChordSequence(NoteSequence):
         return note_value
 
     def create_sequence(self):
-        '''Calls the note generator to build the sequence, however it has an 
-        ever increasing change of updating it to a longer chord. Returns the
-        new list of values.'''
+        '''Calls the note generator to build the sequence, has an
+        ever increasing change of updating each note to a longer chord.
+        Returns the new list of values.'''
         sequence = []
         generator = Sequence.note_generator(self.melody, self.total_length)
         section_lengths = (length for length in self.sections)
