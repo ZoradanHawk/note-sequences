@@ -57,9 +57,9 @@ def read_map_file(filename):
 
 
 def main():
-    create_map_template(map_files=['input_test.mid', 'input_test.mid'],
-                        structure='ABA',
-                        output_file='map_test.txt')
+    create_map_file(map_files=['input_test.mid', 'input_test.mid'],
+                    structure='ABA',
+                    output_file='map_test.txt')
 
 if __name__ == '__main__':
     main()
