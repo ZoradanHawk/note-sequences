@@ -1,10 +1,10 @@
-'''Contains sequence classes, which take lists of note values 
+'''Contains sequence classes, which take lists of note values
 and re-elaborate them in various ways.'''
 
 import random
 import sequence_toolkit as toolkit
 import debug_toolkit as debug
-from mapping_toolkit import read_map_file as create_map
+from mapping_toolkit import read_map_file as read_map
 
 
 class Sequence(object):
@@ -44,7 +44,7 @@ class Sequence(object):
             yield note
 
     def __str__(self):
-        return str(list(self.data))
+        return str(self.data)
 
     def __len__(self):
         return self.total_length
@@ -57,14 +57,16 @@ class NoteSequence(Sequence):
 
     @debug.note_sequence_init
     def __init__(self, melody, map_filename):
-        '''Requires a .txt map file. Uses information within
-        it to build the output sequence based on *melody*.'''
+        '''A Sequence with specific sections and optional transitions
+        between sections. Allows for variation in harmony throughout
+        the sequence. Requires a .txt map file (see mapping_toolkit.py)
+        to specify a structure, mapping and section/transition lengths.'''
         self.structure, self.sections, self.transitions, self.map = read_map(
             map_filename)
         Sequence.__init__(self, melody, sum(self.sections + self.transitions))
 
     def create_sequence(self):
-        '''Builds Section and Transition objects based on the order in 
+        '''Builds Section and Transition objects based on the order in
         *structure* and the lengths in *sections* and *transitions*.
         Returns a list of note values.'''
         sequence = []
@@ -93,11 +95,12 @@ class NoteSequence(Sequence):
 
 
 class SparseSequence(Sequence):
-    def __init__(self, melody, length, pause_value=61):
+
+    def __init__(self, melody, length, increasing=True):
         '''A Sequence with a flag value to be turned into pauses within
-        Sibelius or MuseScore. Pause value is prevalent early in the 
+        Sibelius or MuseScore. Pause value is prevalent early in the
         sequence, nonexistent towards the end.'''
-        self.pause_value = pause_value
+        self.increasing = increasing
         Sequence.__init__(self, melody, length)
 
     def create_sequence(self):
@@ -105,28 +108,34 @@ class SparseSequence(Sequence):
         sequence = []
         generator = Sequence.note_generator(self.melody, self.total_length)
         for i in range(self.total_length):
-            prob = i / float(self.total_length)
+            prob = self._update_probability(i)
             if random.random() < prob:
                 sequence.append(next(generator))
             else:
-                sequence.append((self.pause_value,))
+                sequence.append((5,))
         return sequence
+
+    def _update_probability(self, i):
+        if self.increasing:
+            return i / float(self.total_length)
+        else:
+            return 1 - (i / float(self.total_length))
 
 
 class ChordSequence(NoteSequence):
+    @debug.chord_sequence_init
     def __init__(self, melody, map_filename, chord_increase=1):
         '''A NoteSequence that allows for gradual building of
         chords within the sequence. Adds notes from the same
-        section values based on random chance. Argument chord_
-        _increase determines the maximum number of notes added.'''
+        section values based on random chance.'''
         self.chord_increase = chord_increase
         NoteSequence.__init__(self, melody, map_filename)
 
     def _update(self, note_value, prob, note_set):
-        '''Adds notes from *note_set* that are not currently
-        within the *note_value* tuple, uses them to extend the 
-        note value if probability check succeeds. Returns the
-        redacted (or not) note value.'''
+        '''A NoteSequence that allows for gradual building of
+        chords within the sequence. Adds notes from the same
+        section values based on random chance. Argument chord_
+        _increase determines the maximum number of notes added.'''
         for _ in range(self.chord_increase):
             if random.random() < prob:
                 note_set = [n for n in note_set if n[0] not in note_value]
@@ -165,3 +174,12 @@ class ChordSequence(NoteSequence):
             except IndexError:
                 pass
         return sequence
+
+
+class GroupedSequence(Sequence):
+
+    def __init__(self, melody, length):
+        Sequence.__init__(self, toolkit.group_by_pitch(melody), length)
+        self.grouped_by_pitch = toolkit.flatten_sequence(self.data)
+        Sequence.__init__(self, toolkit.group_by_pauses(melody), length)
+        self.grouped_by_pauses = toolkit.flatten_sequence(self.data)
