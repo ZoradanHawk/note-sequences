@@ -4,13 +4,11 @@ __version__ = '0.7'
 import midi_toolkit as midi
 import sequences
 
-notes = midi.midi_input('test_input.mid')
+# shows new version of midi input and how to use GroupedSequences
 
-# Example of creating sequences
-seq = sequences.Sequence(melody=notes, length=100)
-note_seq = sequences.NoteSequence(melody=notes, map_filename='test_map.txt')
-sparse_seq = sequences.SparseSequence(melody=notes, length=100, pause_value=60)
-chord_seq = sequences.ChordSequence(melody=notes, map_filename='test_map.txt', chord_increase=3)
+notes = midi.melody_input('Guitar1.mid')
 
-midi.midi_output(filename='test_output_with_rhythms.mid', sequence=seq, rhythms=[(2, 3), (2, 2)])
-midi.midi_output(filename='test_output.mid', sequence=note_seq)
+seq = sequences.GroupedSequence(notes, 150)
+
+midi.midi_output('grouped_by_pauses.mid', seq.grouped_by_pauses)
+midi.midi_output('grouped_by_pitch.mid', seq.grouped_by_pitch)
