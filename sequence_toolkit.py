@@ -35,15 +35,15 @@ class Section(object):
         self.data = self.create_section()
 
     def _convert_to_section(self, note_value, section):
-        '''Takes a note value and converts it to its value within 
-        *section* as specified in *mapping*.'''
+        '''Takes a note value and converts it to its value within
+         *section* as specified in *mapping*.'''
         index = self.map['A'].index(note_value)
         return self.map[section][index]
 
     def create_section(self):
         '''Builds the section by calling the instance generator
-        and converting the note values to the correct section 
-        (entry within the instance map).'''
+        and converting the note values to the correct section
+         (entry within the instance map).'''
         for i in range(self.length):
             note = next(self.generator)
             note = Section._convert_to_section(self, note, self.section)
@@ -92,3 +92,42 @@ class Transition(Section):
         '''Decreases the instance probability by a
         fraction proportional to instance length.'''
         self.probability -= 1 / float(self.length)
+
+
+def flatten_sequence(sequence):
+    final = []
+    for group in sequence:
+        final.extend(group)
+    return final
+
+
+def group_by_pitch(sequence):
+    final = []
+    group = []
+    for i, note in enumerate(sequence[:-1]):
+        next_note = sequence[i + 1]
+        if note == next_note:
+            group.append(note)
+        else:
+            final.append(tuple(group + [note]))
+            group = []
+    group.append(sequence[-1])
+    final.append(tuple(group))
+    return final
+
+
+def group_by_pauses(sequence):
+    final = []
+    group = []
+    for i, note in enumerate(sequence[:-1]):
+        next_note = sequence[i + 1]
+        if note == (5,):
+            group.append(note)
+        elif next_note == (5,):
+            final.append(tuple(group) + (note,))
+            group = []
+        else:
+            group.append(note)
+    group.append(sequence[-1])
+    final.append(tuple(group))
+    return final
