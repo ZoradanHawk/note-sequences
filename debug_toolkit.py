@@ -35,18 +35,6 @@ def note_sequence_init(function):
     return inner
 
 
-def sparse_sequence_init(function):
-    @functools.wraps(function)
-    def inner(self, melody, length, pause_value=61):
-        if not isinstance(pause_value, int):
-            raise TypeError('Invalid pause value: {}. Must be an int.'
-                            .format(pause_value))
-        if not pause_value in range(128):
-            raise ValueError('Pause value must be a valid midi note (0 - 128).')
-        return function(self, melody, length, pause_value)
-    return inner
-
-
 def chord_sequence_init(function):
     @functools.wraps(function)
     def inner(self, melody, map_filename, chord_increase=1):
@@ -59,18 +47,22 @@ def chord_sequence_init(function):
     return inner
 
 
+def check_note_value(note_value):
+    if isinstance(note_value, int):
+        return True
+    elif isinstance(note_value, tuple):
+        for note in note_value:
+            check_note_value(note)
+    else:
+        raise TypeError('Invalid note value: {}. Must be tuple of integer/s.'
+                        .format(note_value))
+
+
 def create_transition_matrix(function):
     @functools.wraps(function)
     def inner(numbers):
         for note_value in numbers:
-            if isinstance(note_value, tuple):
-                for note in note_value:
-                    if not isinstance(note, int):
-                        raise TypeError('Invalid note: {}. Must be an int'
-                                        .format(note))
-            else:
-                raise TypeError('Invalid note value: {}. Must be a tuple.'
-                               .format(note_value))
+            check_note_value(note_value)
         return function(numbers)
     return inner
 
