@@ -155,3 +155,4 @@ def midi_output(filename, sequence, rhythms=[]):
                                  velocity=0, time=0))
         track.append(MetaMessage('end_of_track'))
         outfile.save(filename)
+
