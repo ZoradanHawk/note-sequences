@@ -183,3 +183,4 @@ class GroupedSequence(Sequence):
         self.grouped_by_pitch = toolkit.flatten_sequence(self.data)
         Sequence.__init__(self, toolkit.group_by_pauses(melody), length)
         self.grouped_by_pauses = toolkit.flatten_sequence(self.data)
+
