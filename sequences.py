@@ -24,10 +24,10 @@ def create_mapseq(melody, map_file):
                                                section=section))
         try:
             # Adding Transitions
-            next_section = info.structure[i + 1]
+            next_section = seq_info.structure[i + 1]
             sequence.extend(tools.generate_transition(generator=notes,
                                          length=next(transition_lengths),
-                                         mapping=info.mapping,
+                                         mapping=seq_info.mapping,
                                          section=section,
                                          next_section=next_section))
         except IndexError:
