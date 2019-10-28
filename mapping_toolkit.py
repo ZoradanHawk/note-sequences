@@ -5,7 +5,8 @@ def build_mapping(midi_files):
     data = {}
     for i, file_name in enumerate(midi_files):
         section_letter = chr(i + 65)
-        section_values = create_ordered_set(read_melody(file_name))
+        section_values = create_ordered_set(read_melody(file_name)[0])  # only takes first track
+        print(section_values)
         data[section_letter] = section_values
     return data
 
@@ -93,8 +94,6 @@ class Map(object):
 # Debugger functions
 
 def debug_read_map_file(structure, sections, transitions, length, mapping):
-    if 'A' not in structure:
-        raise ValueError('Structure must contain character "A"!')
     for value in mapping.values():
         if len(value) != len(list(mapping.values())[0]):
             raise ValueError('Entries in *mapping* must have same length!')
@@ -115,12 +114,12 @@ def debug_read_map_file(structure, sections, transitions, length, mapping):
 
 
 def debug_from_midi_files(midi_files, structure):
-    for filename in map_files:
+    for filename in midi_files:
         if filename[-4:] != '.mid':
-            raise ValueError('*map_files* must contain midi file names!')
+            raise ValueError('*midi_files* must contain midi file names!')
     if 'A' not in structure:
         raise ValueError('Structure must contain character "A".')
-    letters = set([chr(i) for i in range(65, 65 + len(map_files))])
+    letters = set([chr(i) for i in range(65, 65 + len(midi_files))])
     if set(structure) != letters:
         raise ValueError('Invalid structure: {}. Must be based on {}'.
                          format(structure, letters))
@@ -128,9 +127,9 @@ def debug_from_midi_files(midi_files, structure):
 
 
 def main():
-    data = Map.from_midi_files(midi_files=['151.mid', '152.mid', '153.mid', '154.mid', '155.mid'],
-                               structure='AEDBCEABAC')
-    data.write_map_file('Map10_map.txt')
+    data = Map.from_midi_files(midi_files=['1Prime.mid', '2Prime.mid', '4Prime.mid', '5Prime.mid'],
+                               structure='ABABCDABA')
+    data.write_map_file('Map10.txt')
     
 if __name__ == '__main__':
     main()
