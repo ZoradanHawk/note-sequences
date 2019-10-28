@@ -22,4 +22,4 @@ Dependencies: Mido 1.1.19
 
 *mapping_toolkit.py* contains functions to read in information from Map files, required to build Mapped and Chorded sequences. The module can also be run to build a new Map file. It is currently set to build the test map, Map10.txt. Change the arguments in main() to produce a different map.
 
-*notesequence_unittests.py* currently contains unit tests for the functions in sequence_toolkit.py. It will be expanded within the next few months.
+*notesequence_unittests.py* currently contains unit tests for the functions in sequence_toolkit.py. It will be expanded within the next few months (or not. Life, the harlot that she is, got in the way. 2016 me was optimistic).
