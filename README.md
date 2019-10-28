@@ -14,7 +14,7 @@ Dependencies: Mido 1.1.19
 
 *notesequence.py* is a version of main.py for command prompt. Supports command line arguments.
 
-*sections.py* contains higher level functions to build the more complex sequences.
+*sequences.py* contains higher level functions to build the more complex sequences.
 
 *sequence_toolkit.py* contains various lower level functions used to build the sequences.
 
