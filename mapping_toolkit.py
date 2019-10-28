@@ -6,7 +6,6 @@ def build_mapping(midi_files):
     for i, file_name in enumerate(midi_files):
         section_letter = chr(i + 65)
         section_values = create_ordered_set(read_melody(file_name)[0])  # only takes first track
-        print(section_values)
         data[section_letter] = section_values
     return data
 
