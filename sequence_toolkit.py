@@ -9,15 +9,22 @@ def generate_sequence(melody, length):
     '''Builds a note sequence based on the transition probabilities 
     of a melody. Takes a melody and length (in notes) as input. Output
     is a generator.'''
-    
+
     note = random.choice(melody)
     matrix = create_transition_matrix(melody)
-    repetitions = 0
-    for i in range(length):
-        if not matrix[note]:  # fix for notes with no followers
-            note = max(matrix, key=lambda x: len(matrix[x]))
-        note, repetitions = _search_matrix(note, matrix, repetitions)
-        yield note
+    if len(set(melody)) == 1:  # the sequence is composed of one note on repeat
+        for i in range(length):
+            if not matrix[note]: # fix for notes with no followers
+                note = max(matrix, key=lambda x: len(matrix[x]))
+            note = _choose_note_ignore_rep(note, matrix)
+            yield note
+    else:
+        repetitions = 0
+        for i in range(length):
+            if not matrix[note]:  # fix for notes with no followers
+                note = max(matrix, key=lambda x: len(matrix[x]))
+            note, repetitions = _choose_note_limit_rep(note, matrix, repetitions)
+            yield note
 
 
 def create_transition_matrix(melody):
@@ -41,10 +48,23 @@ def create_transition_matrix(melody):
     return matrix
 
 
-def _search_matrix(note, matrix, repetitions):
+def _choose_note_ignore_rep(note, matrix):
+    
+    '''Component of generate_sequence. Chooses the next note
+    in the sequence based on the current one, does not take
+    repetitions into account.'''
+    rand = random.random()
+    current_prob = 0.0  
+    for possible_note, probability in matrix[note]:
+        current_prob += probability
+        if rand < current_prob:
+            return possible_note
+    
+
+def _choose_note_limit_rep(note, matrix, repetitions):
 
     '''Component of generate_sequence. Chooses the next note
-    in the sequence based on the current one. Also keeps track
+    in the sequence based on the current one, but keeps track
     of repetitions, avoiding notes that have been already selected
     three times in a row. Output is a tuple (note, repetitions).'''
     
@@ -169,7 +189,7 @@ def group_by_pauses(sequence):
     return final
 
 
-def group_in_chunks(sequence, chunk_size):
+def group_by_segment_size(sequence, segment_size):
     
     '''Component of the grouped sequence. Takes a sequence and groups
     elements into tuples of length determined by input chunk_size.'''
@@ -177,7 +197,7 @@ def group_in_chunks(sequence, chunk_size):
     final = []
     group = []
     for i, note in enumerate(sequence):
-        if (i + 1) % chunk_size:
+        if (i + 1) % segment_size:
             group.append(note)
         else:
             final.append(tuple(group + [note]))
