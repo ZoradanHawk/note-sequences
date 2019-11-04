@@ -54,10 +54,11 @@ class Map(object):
         self.mapping = mapping
 
     @classmethod
-    def from_midi_files(cls, midi_files, structure):
-        midi_files, structure = debug_from_midi_files(midi_files, structure)
-        sections = [16] * len(structure)
-        transitions = [8] * (len(structure) - 1)
+    def from_midi_files(cls, midi_files, structure, s_length, t_length):
+        midi_files, structure = debug_from_midi_files(midi_files, structure,
+                                                      s_length, t_length)
+        sections = [s_length] * len(structure)
+        transitions = [t_length] * (len(structure) - 1)
         mapping = build_mapping(midi_files)
         return cls(structure, sections, transitions, mapping)
 
@@ -112,7 +113,7 @@ def debug_read_map_file(structure, sections, transitions, length, mapping):
     return structure, sections, transitions, mapping
 
 
-def debug_from_midi_files(midi_files, structure):
+def debug_from_midi_files(midi_files, structure, s_length, t_length):
     for filename in midi_files:
         if filename[-4:] != '.mid':
             raise ValueError('*midi_files* must contain midi file names!')
@@ -122,13 +123,21 @@ def debug_from_midi_files(midi_files, structure):
     if set(structure) != letters:
         raise ValueError('Invalid structure: {}. Must be based on {}'.
                          format(structure, letters))
+    if type(s_length) != int:
+        raise TypeError('Length of the Sections must be a number of notes!')
+    if type(s_length) != int:
+        raise TypeError('Length of the Transitions must be a number of notes!')
+    if s_length < 1 or t_length < 1:
+        raise ValueError('Length of Sections or Transitions must be positive!')
     return midi_files, structure
 
 
 def main():
     data = Map.from_midi_files(midi_files=['1Prime.mid', '2Prime.mid', '4Prime.mid', '5Prime.mid'],
-                               structure='ABABCDABA')
-    data.write_map_file('Map10.txt')
+                               structure='ABABCDABA',
+                               s_length=16,
+                               t_length=8)
+    data.write_map_file('Map11.txt')
     
 if __name__ == '__main__':
     main()
