@@ -2,6 +2,7 @@
 write values into midi files.'''
 
 import random
+import os
 
 from mido import Message, MidiFile, MidiTrack, MetaMessage
 
@@ -110,13 +111,57 @@ def read_rhythms(filename):
     for track in data:
         new_track = []
         for note_value, delta_time in track:
-            if note_value == (5,):
+            if note_value == (5,):  # (5,) is pauses
                 new_track.append(note_value + delta_time)
             else:
                 new_track.append(delta_time)
         rhythms.append(new_track)
     return rhythms
     # return [[delta_time for note_value, delta_time in data[track]]]
+
+
+def test_midi_filename(midi_file_name):
+
+    '''Checks if a specified midi file is present in your directory.'''
+    
+    try:
+        read_melody(midi_file_name)
+        read_rhythms(midi_file_name)
+    except (FileNotFoundError, OSError):
+        midi_files = [f for f in next(os.walk('./'))[2] if f[-4:] == '.mid']
+        if not midi_files:
+            raise SystemExit('''Invalid File Name. No midi files detected
+                        in your directory.''')
+        print('Invalid File Name. Midi Files in your directory: {}.'.format(
+                                                                midi_files))
+        user_input = str(input('Try again? Y|N: '))
+        if user_input.upper() == 'Y':
+            new_attempt = str(input('''New Midi file attempt: '''))
+            midi_file_name = test_midi_filename(new_attempt)
+        else:
+            raise SystemExit()
+    return midi_file_name
+
+
+def create_midi_file_list():
+
+    '''Creates a list of midi files specified by the user. The list is
+    needed to build a Map object from midi files.'''
+    
+    list_length = int(input('How many Midi files do you need in your Map? '))
+    for file_nr in range(list_length):
+        file_name = str(input('''Midi File {}: '''.format(chr(file_nr + 65))))
+        tested_name = test_midi_filename(file_name)
+        midi_file_list.append(tested_name)
+    return midi_file_list
+
+
+def list_midi_files_in_directory():
+    midis= [f for f in next(os.walk('./'))[2] if f[-4:] == '.mid']
+    if not midis:
+        print('No midi files in directory.')
+        raise SystemExit()
+    print('Midi Files in your directory: {}'.format(midis))
 
 
 def extract_delta_times(sequence, rhythms):
