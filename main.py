@@ -1,29 +1,12 @@
 __author__ = 'Thomas Grossi, Matt Giannotti'
-__version__ = '0.85'
+__version__ = '0.9'
 
-import os
-
-from midi_toolkit import read_melody, read_rhythms, write_midifile
+from midi_toolkit import read_melody, read_rhythms, test_midi_filename
+from midi_toolkit import create_midi_file_list, write_midifile
+from midi_toolkit import list_midi_files_in_directory
+from mapping_toolkit import map_interface
 from sequences import create_mapseq, create_sparseseq, create_chordseq
 import sequence_toolkit as tools
-
-
-def get_map():
-    map_file = str(input('Map file (.txt format): '))
-    try:
-        open(map_file, 'r')
-    except TypeError:
-        maps = [f for f in next(os.walk('./'))[2] if f[-4:] == '.txt']
-        if not maps:
-            raise SystemExit('Invalid File Name. No .txt files detected in your directory.')
-        print('Invalid File Name. .txt files in your directory: {}.'.format(
-                                                                        maps))
-        user_input = str(input('Try again? Y|N: '))
-        if user_input.upper() == 'Y':
-            map_file = get_map()
-        else:
-            raise SystemExit()
-    return map_file
 
 
 def get_input_method():
@@ -39,27 +22,15 @@ def get_input_method():
 
 
 def get_input_sequence(function):
-    midifile = str(input('Input File Name (midi): '))
-    try:
-        input_sequence = function(midifile)
-    except (FileNotFoundError, OSError):
-        midi_files = [f for f in next(os.walk('./'))[2] if f[-4:] == '.mid']
-        if not midi_files:
-            raise SystemExit('Invalid File Name. No midi files detected in your directory.')
-        print('Invalid File Name. Midi Files in your directory: {}.'.format(
-                                                                midi_files))
-        user_input = str(input('Try again? Y|N: '))
-        if user_input.upper() == 'Y':
-            input_sequence = get_input_sequence(function)
-        else:
-            raise SystemExit()
-    if not input_sequence:
-        raise SystemExit('Problem with the midi file. Try another one.')
-    return input_sequence
+    list_midi_files_in_directory()
+    input_filename = str(input('Input File Name (.mid): '))
+    tested_midi_file_name = test_midi_filename(input_filename)
+    input_sequence = function(tested_midi_file_name)
+    return input_sequence, tested_midi_file_name
 
 
 def get_output_name():
-    output_name = str(input('Output File Name (midi): '))
+    output_name = str(input('Output File Name (.mid): '))
     if output_name[-4:] != ".mid":
         if '.' not in output_name:
             return '{}.mid'.format(output_name)
@@ -98,14 +69,14 @@ def get_segment_size():
             raise SystemExit()
     return int(length)
 
+
 def write_seq(melody):
     length = get_length()
     return list(tools.generate_sequence(melody, length))
 
 
-
 def write_mapseq(melody):
-    map_file = get_map()
+    map_file = map_interface()
     return create_mapseq(melody, map_file)
 
 
@@ -118,7 +89,7 @@ def write_sparseseq(melody):
 
 
 def write_chordseq(melody):
-    map_file = get_map()
+    map_file = map_interface()
     increase = str(input('Chord Increase: '))
     return create_chordseq(melody, map_file, int(increase))
 
