@@ -1,4 +1,5 @@
-from midi_toolkit import read_melody
+import os
+from midi_toolkit import read_melody, create_midi_file_list
 
 
 def build_mapping(midi_files):
@@ -54,11 +55,14 @@ class Map(object):
         self.mapping = mapping
 
     @classmethod
-    def from_midi_files(cls, midi_files, structure, s_length, t_length):
-        midi_files, structure = debug_from_midi_files(midi_files, structure,
-                                                      s_length, t_length)
-        sections = [s_length] * len(structure)
-        transitions = [t_length] * (len(structure) - 1)
+    def from_midi_files(cls, midi_files, structure, section_length,
+                        transition_length):
+        midi_files, structure, s_len, t_len = debug_from_midi_files(midi_files,
+                                                      structure,
+                                                      section_length,
+                                                      transition_length)
+        sections = [s_len] * len(structure)
+        transitions = [t_len] * (len(structure) - 1)
         mapping = build_mapping(midi_files)
         return cls(structure, sections, transitions, mapping)
 
@@ -91,6 +95,41 @@ class Map(object):
                 self.structure, self.sections, self.transitions, self.mapping)
 
 
+def create_map():
+
+    '''Creates a map file with specified information.'''
+
+    map_name = str(input('''Map name: '''))
+    midi_files = create_midi_file_list(first_midi)
+    structure = str(input('''Structure: ''')).upper()
+    section_len = str(input('''Length of Sections (number of notes): '''))
+    transition_len = str(input('''Length of Transitions (number of notes): '''))
+    data = Map.from_midi_files(midi_files=midi_files,
+                               structure=structure,
+                               section_length=int(section_len),
+                               transition_length=int(transition_len))
+    data.write_map_file(map_name)
+    print('Map created: {}.'.format(map_name))
+    return map_name
+
+
+def map_interface():
+
+    '''Calls on the user to decide whether they want to build a Map file and
+    use it, or use an already existing file.'''
+    
+    from_user = str(input('Do you want to build a new Map file |' +
+                          ' Retrieve an existing Map file? 1|2: '))
+    if from_user == '1':
+        map_name = create_map()
+    elif from_user == '2':
+        map_name = str(input('Desired Map (.txt file): '))
+    else:
+        print('Incorrect Option: {}. Options are 1 or 2.'.format(from_user))
+        raise SystemExit()
+    return test_map_file(map_name)
+
+
 # Debugger functions
 
 def debug_read_map_file(structure, sections, transitions, length, mapping):
@@ -113,31 +152,59 @@ def debug_read_map_file(structure, sections, transitions, length, mapping):
     return structure, sections, transitions, mapping
 
 
-def debug_from_midi_files(midi_files, structure, s_length, t_length):
+def debug_from_midi_files(midi_files, structure, section_length,
+                          transition_length):
     for filename in midi_files:
         if filename[-4:] != '.mid':
             raise ValueError('*midi_files* must contain midi file names!')
     if 'A' not in structure:
         raise ValueError('Structure must contain character "A".')
     letters = set([chr(i) for i in range(65, 65 + len(midi_files))])
-    if set(structure) != letters:
+    if not set(structure).issubset(letters):
         raise ValueError('Invalid structure: {}. Must be based on {}'.
                          format(structure, letters))
-    if type(s_length) != int:
-        raise TypeError('Length of the Sections must be a number of notes!')
-    if type(s_length) != int:
-        raise TypeError('Length of the Transitions must be a number of notes!')
-    if s_length < 1 or t_length < 1:
-        raise ValueError('Length of Sections or Transitions must be positive!')
-    return midi_files, structure
+    if type(section_length) != int:
+        raise TypeError('Length of the sections must be a number of notes!')
+    if type(transition_length) != int:
+        raise TypeError('Length of the transitions must be a number of notes!')
+    if section_length < 1 or transition_length < 1:
+        raise ValueError('Length of sections or transitions must be positive!')
+    return midi_files, structure, section_length, transition_length
+
+
+def test_map_file(map_name):
+
+    '''Takes the name of a Map file as input, tests to see
+    if the file exists in your directory.'''
+
+    if map_name[-4:] != '.txt':
+        print('''File name must include .txt extension.''')
+        raise SystemExit()
+    try:
+        open(map_name, 'r')
+    except FileNotFoundError:
+        maps = [f for f in next(os.walk('./'))[2] if f[-4:] == '.txt']
+        if not maps:
+            print('No .txt files detected in your directory.')
+            raise SystemExit()
+        print('"{}" is not present in the directory.'.format(map_name) +
+              ' .txt files in your directory:{}.'.format(maps))
+        raise SystemExit()
+    try:
+        read_map_file(map_name)
+    except:
+        print('{} is not a Map file.'.format(map_name))
+        raise SystemExit()
+    return map_name
 
 
 def main():
     data = Map.from_midi_files(midi_files=['1Prime.mid', '2Prime.mid', '4Prime.mid', '5Prime.mid'],
                                structure='ABABCDABA',
-                               s_length=16,
-                               t_length=8)
+                               section_length=16,
+                               transition_length=8)
     data.write_map_file('Map11.txt')
+
     
 if __name__ == '__main__':
     main()
